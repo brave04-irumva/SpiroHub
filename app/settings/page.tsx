@@ -85,7 +85,9 @@ export default function SettingsPage() {
           .order("created_at", { ascending: false }),
         supabase
           .from("students")
-          .select("id, full_name, student_id, email, nationality, phone, course, created_at")
+          .select(
+            "id, full_name, student_id, email, nationality, phone, course, created_at",
+          )
           .order("created_at", { ascending: false }),
       ]);
       if (officersRes.data) setOfficers(officersRes.data);
@@ -98,7 +100,9 @@ export default function SettingsPage() {
           .select("*")
           .order("created_at", { ascending: false });
         if (ann) setAnnouncements(ann);
-      } catch { /* table not yet created */ }
+      } catch {
+        /* table not yet created */
+      }
 
       // System settings / permissions
       try {
@@ -108,7 +112,9 @@ export default function SettingsPage() {
           .eq("key", "officer_can_delete_students")
           .single();
         if (setting) setOfficerCanDelete(setting.value === "true");
-      } catch { /* table not yet created */ }
+      } catch {
+        /* table not yet created */
+      }
     }
     setLoading(false);
   }
@@ -265,12 +271,6 @@ export default function SettingsPage() {
           <h3 className="font-black text-slate-900 uppercase tracking-widest text-[10px] mb-8 flex items-center gap-2">
             <UserPlus size={16} className="text-blue-600" /> Create Account
           </h3>
-
-          <div className="mb-6 p-4 rounded-2xl border border-amber-100 bg-amber-50 text-amber-800 text-[11px] font-semibold leading-relaxed">
-            This form creates both Supabase login credentials and the matching
-            profile record in one action.
-          </div>
-
           {feedbackError && (
             <div className="mb-4 p-4 rounded-2xl border border-red-100 bg-red-50 text-red-700 text-xs font-bold">
               {feedbackError}
@@ -358,10 +358,10 @@ export default function SettingsPage() {
             >
               {isAdding ? (
                 <Loader2 className="animate-spin mx-auto" size={18} />
+              ) : newRole === "STUDENT" ? (
+                "Provision Student Profile"
               ) : (
-                newRole === "STUDENT"
-                  ? "Provision Student Profile"
-                  : "Provision Account"
+                "Provision Account"
               )}
             </button>
           </form>
@@ -385,7 +385,10 @@ export default function SettingsPage() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {authorizedAccounts.map((account) => (
-                <tr key={`${account.kind}_${account.id}`} className="hover:bg-slate-50 transition-all">
+                <tr
+                  key={`${account.kind}_${account.id}`}
+                  className="hover:bg-slate-50 transition-all"
+                >
                   <td className="px-6 py-5">
                     <div className="font-black text-slate-900">
                       {account.full_name}
@@ -408,7 +411,9 @@ export default function SettingsPage() {
                     </span>
                   </td>
                   <td className="px-6 py-5 text-slate-500 text-xs font-bold uppercase tracking-wider">
-                    {account.role === "STUDENT" ? account.student_id ?? "—" : "Staff"}
+                    {account.role === "STUDENT"
+                      ? (account.student_id ?? "—")
+                      : "Staff"}
                   </td>
                   <td className="px-6 py-5 text-right">
                     {account.email !== "admin@daystar.ac.ke" && (
@@ -442,13 +447,20 @@ export default function SettingsPage() {
               e.preventDefault();
               if (!newAnnouncement.trim()) return;
               setSavingAnnouncement(true);
-              const { data: { session } } = await supabase.auth.getSession();
-              await supabase.from("announcements").insert([{
-                message: newAnnouncement.trim(),
-                created_by: session?.user?.email ?? "Admin",
-              }]);
+              const {
+                data: { session },
+              } = await supabase.auth.getSession();
+              await supabase.from("announcements").insert([
+                {
+                  message: newAnnouncement.trim(),
+                  created_by: session?.user?.email ?? "Admin",
+                },
+              ]);
               setNewAnnouncement("");
-              const { data: ann } = await supabase.from("announcements").select("*").order("created_at", { ascending: false });
+              const { data: ann } = await supabase
+                .from("announcements")
+                .select("*")
+                .order("created_at", { ascending: false });
               if (ann) setAnnouncements(ann);
               setSavingAnnouncement(false);
             }}
@@ -471,22 +483,39 @@ export default function SettingsPage() {
           </form>
 
           {announcements.length === 0 ? (
-            <p className="text-slate-400 text-sm font-medium text-center py-4">No announcements yet.</p>
+            <p className="text-slate-400 text-sm font-medium text-center py-4">
+              No announcements yet.
+            </p>
           ) : (
             <div className="space-y-3">
               {announcements.map((a) => (
-                <div key={a.id} className={`flex items-start justify-between gap-4 p-4 rounded-2xl border ${a.is_active ? "bg-blue-50 border-blue-100" : "bg-slate-50 border-slate-100 opacity-60"}`}>
+                <div
+                  key={a.id}
+                  className={`flex items-start justify-between gap-4 p-4 rounded-2xl border ${a.is_active ? "bg-blue-50 border-blue-100" : "bg-slate-50 border-slate-100 opacity-60"}`}
+                >
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-slate-800">{a.message}</p>
+                    <p className="text-sm font-medium text-slate-800">
+                      {a.message}
+                    </p>
                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">
-                      {new Date(a.created_at).toLocaleDateString()} · by {a.created_by}
+                      {new Date(a.created_at).toLocaleDateString()} · by{" "}
+                      {a.created_by}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <button
                       onClick={async () => {
-                        await supabase.from("announcements").update({ is_active: !a.is_active }).eq("id", a.id);
-                        setAnnouncements((prev) => prev.map((x) => x.id === a.id ? { ...x, is_active: !x.is_active } : x));
+                        await supabase
+                          .from("announcements")
+                          .update({ is_active: !a.is_active })
+                          .eq("id", a.id);
+                        setAnnouncements((prev) =>
+                          prev.map((x) =>
+                            x.id === a.id
+                              ? { ...x, is_active: !x.is_active }
+                              : x,
+                          ),
+                        );
                       }}
                       className="text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-blue-600 transition-all"
                     >
@@ -495,8 +524,13 @@ export default function SettingsPage() {
                     <button
                       onClick={async () => {
                         if (!confirm("Delete this announcement?")) return;
-                        await supabase.from("announcements").delete().eq("id", a.id);
-                        setAnnouncements((prev) => prev.filter((x) => x.id !== a.id));
+                        await supabase
+                          .from("announcements")
+                          .delete()
+                          .eq("id", a.id);
+                        setAnnouncements((prev) =>
+                          prev.filter((x) => x.id !== a.id),
+                        );
                       }}
                       className="text-slate-300 hover:text-red-500 transition-all"
                     >
@@ -513,7 +547,8 @@ export default function SettingsPage() {
       <div className="bg-white border border-slate-200 rounded-[2rem] shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/60">
           <h3 className="font-black text-slate-900 uppercase tracking-widest text-[10px] flex items-center gap-2">
-            <ShieldCheck size={16} className="text-blue-600" /> Registered Students
+            <ShieldCheck size={16} className="text-blue-600" /> Registered
+            Students
           </h3>
         </div>
         {students.length === 0 ? (
@@ -535,13 +570,28 @@ export default function SettingsPage() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {students.map((student) => (
-                  <tr key={student.id} className="hover:bg-slate-50 transition-all">
-                    <td className="px-6 py-4 font-black text-slate-900">{student.full_name}</td>
-                    <td className="px-6 py-4 text-slate-600 font-bold text-xs">{student.student_id}</td>
-                    <td className="px-6 py-4 text-slate-600 font-bold text-xs">{student.email}</td>
-                    <td className="px-6 py-4 text-slate-600 font-bold text-xs">{student.nationality || "—"}</td>
-                    <td className="px-6 py-4 text-slate-600 font-bold text-xs">{student.phone || "—"}</td>
-                    <td className="px-6 py-4 text-slate-600 font-bold text-xs">{student.course || "—"}</td>
+                  <tr
+                    key={student.id}
+                    className="hover:bg-slate-50 transition-all"
+                  >
+                    <td className="px-6 py-4 font-black text-slate-900">
+                      {student.full_name}
+                    </td>
+                    <td className="px-6 py-4 text-slate-600 font-bold text-xs">
+                      {student.student_id}
+                    </td>
+                    <td className="px-6 py-4 text-slate-600 font-bold text-xs">
+                      {student.email}
+                    </td>
+                    <td className="px-6 py-4 text-slate-600 font-bold text-xs">
+                      {student.nationality || "—"}
+                    </td>
+                    <td className="px-6 py-4 text-slate-600 font-bold text-xs">
+                      {student.phone || "—"}
+                    </td>
+                    <td className="px-6 py-4 text-slate-600 font-bold text-xs">
+                      {student.course || "—"}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -563,40 +613,99 @@ export default function SettingsPage() {
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-slate-100">
-                  <th className="pb-3 text-[9px] font-black text-slate-400 uppercase tracking-widest">Capability</th>
-                  <th className="pb-3 px-6 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Admin</th>
-                  <th className="pb-3 px-6 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Officer</th>
+                  <th className="pb-3 text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                    Capability
+                  </th>
+                  <th className="pb-3 px-6 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">
+                    Admin
+                  </th>
+                  <th className="pb-3 px-6 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">
+                    Officer
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {[
-                  { label: "View all student cases", admin: true, officer: true, fixed: true },
-                  { label: "Create document requests", admin: true, officer: true, fixed: true },
-                  { label: "Advance case stages", admin: true, officer: true, fixed: true },
-                  { label: "Export CSV reports", admin: true, officer: true, fixed: true },
-                  { label: "Create officer accounts", admin: true, officer: false, fixed: true },
-                  { label: "View audit log", admin: true, officer: false, fixed: true },
-                  { label: "Manage announcements", admin: true, officer: false, fixed: true },
-                  { label: "Delete student cases", admin: true, officer: null, fixed: false, key: "delete_students" },
+                  {
+                    label: "View all student cases",
+                    admin: true,
+                    officer: true,
+                    fixed: true,
+                  },
+                  {
+                    label: "Create document requests",
+                    admin: true,
+                    officer: true,
+                    fixed: true,
+                  },
+                  {
+                    label: "Advance case stages",
+                    admin: true,
+                    officer: true,
+                    fixed: true,
+                  },
+                  {
+                    label: "Export CSV reports",
+                    admin: true,
+                    officer: true,
+                    fixed: true,
+                  },
+                  {
+                    label: "Create officer accounts",
+                    admin: true,
+                    officer: false,
+                    fixed: true,
+                  },
+                  {
+                    label: "View audit log",
+                    admin: true,
+                    officer: false,
+                    fixed: true,
+                  },
+                  {
+                    label: "Manage announcements",
+                    admin: true,
+                    officer: false,
+                    fixed: true,
+                  },
+                  {
+                    label: "Delete student cases",
+                    admin: true,
+                    officer: null,
+                    fixed: false,
+                    key: "delete_students",
+                  },
                 ].map((row) => (
                   <tr key={row.label}>
-                    <td className="py-3.5 text-sm font-medium text-slate-700">{row.label}</td>
+                    <td className="py-3.5 text-sm font-medium text-slate-700">
+                      {row.label}
+                    </td>
                     <td className="py-3.5 px-6 text-center">
-                      <span className="text-emerald-500 text-base font-black">✓</span>
+                      <span className="text-emerald-500 text-base font-black">
+                        ✓
+                      </span>
                     </td>
                     <td className="py-3.5 px-6 text-center">
                       {row.fixed ? (
                         row.officer ? (
-                          <span className="text-emerald-500 text-base font-black">✓</span>
+                          <span className="text-emerald-500 text-base font-black">
+                            ✓
+                          </span>
                         ) : (
-                          <span className="text-slate-300 text-base font-black">—</span>
+                          <span className="text-slate-300 text-base font-black">
+                            —
+                          </span>
                         )
                       ) : (
                         <button
                           onClick={async () => {
                             const next = !officerCanDelete;
                             setSavingPermissions(true);
-                            await supabase.from("system_settings").upsert({ key: "officer_can_delete_students", value: String(next), updated_at: new Date().toISOString() });
+                            await supabase.from("system_settings").upsert({
+                              key: "officer_can_delete_students",
+                              value: String(next),
+                              updated_at: new Date().toISOString(),
+                            });
                             setOfficerCanDelete(next);
                             setSavingPermissions(false);
                           }}
@@ -604,9 +713,21 @@ export default function SettingsPage() {
                           className="flex items-center gap-1.5 mx-auto text-[9px] font-black uppercase tracking-widest transition-all"
                         >
                           {officerCanDelete ? (
-                            <><ToggleRight size={22} className="text-blue-600" /><span className="text-blue-600">On</span></>
+                            <>
+                              <ToggleRight
+                                size={22}
+                                className="text-blue-600"
+                              />
+                              <span className="text-blue-600">On</span>
+                            </>
                           ) : (
-                            <><ToggleLeft size={22} className="text-slate-300" /><span className="text-slate-400">Off</span></>
+                            <>
+                              <ToggleLeft
+                                size={22}
+                                className="text-slate-300"
+                              />
+                              <span className="text-slate-400">Off</span>
+                            </>
                           )}
                         </button>
                       )}
@@ -616,7 +737,6 @@ export default function SettingsPage() {
               </tbody>
             </table>
           </div>
-          <p className="text-[10px] text-slate-400 font-medium">Toggleable permissions are stored in the database and applied system-wide.</p>
         </div>
       </div>
     </div>

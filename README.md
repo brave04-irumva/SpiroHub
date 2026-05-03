@@ -43,7 +43,6 @@ International students at Daystar University require active tracking of their im
 | Icons | lucide-react ^1.8.0 |
 | Charts | Recharts ^3.8.1 |
 | Auth & Database | Supabase (PostgreSQL + Row Level Security) |
-| Email | Resend ^6.12.2 |
 | Deployment | Vercel (auto-deploy from GitHub main) |
 | Version Control | Git + GitHub |
 
