@@ -259,11 +259,8 @@ export default function SettingsPage() {
           Access Control
         </p>
         <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter uppercase leading-none">
-          System Governance
+          System Settings
         </h1>
-        <p className="text-slate-500 font-medium text-sm mt-2">
-          Role-based access control and staff provisioning.{" "}
-        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-7">
@@ -361,7 +358,7 @@ export default function SettingsPage() {
               ) : newRole === "STUDENT" ? (
                 "Provision Student Profile"
               ) : (
-                "Provision Account"
+                "Create Account"
               )}
             </button>
           </form>
@@ -605,7 +602,7 @@ export default function SettingsPage() {
         <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/60 flex items-center gap-2">
           <Shield size={16} className="text-blue-600" />
           <h3 className="font-black text-slate-900 uppercase tracking-widest text-[10px]">
-            Role Permissions Matrix
+            Role Permissions
           </h3>
         </div>
         <div className="p-7 space-y-6">
