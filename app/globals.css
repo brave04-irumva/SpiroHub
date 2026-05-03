@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: white;
+}
+
+/* ── Dark mode via CSS filter inversion ─────────────────────────── */
+html.dark {
+  filter: invert(1) hue-rotate(180deg);
+}
+/* Re-invert media so photos/videos look natural */
+html.dark img,
+html.dark video,
+html.dark iframe {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+@media print {
+  aside,
+  header,
+  nav,
+  .print\:hidden {
+    display: none !important;
+  }
+  main {
+    margin-left: 0 !important;
+    padding: 0 !important;
+  }
+  body {
+    background: white !important;
+  }
+}
