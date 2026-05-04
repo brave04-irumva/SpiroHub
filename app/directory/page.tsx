@@ -452,7 +452,7 @@ export default function DirectoryPage() {
             )}
             {success && (
               <div className="p-4 bg-emerald-50 text-emerald-700 rounded-2xl text-[10px] font-black border border-emerald-100 uppercase tracking-wider flex items-center justify-center gap-2">
-                <CheckCircle size={14} /> Student account and compliance application created.
+                <CheckCircle size={14} /> Student account created.
               </div>
             )}
 
