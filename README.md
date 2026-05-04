@@ -359,4 +359,4 @@ Production URL: https://spirohub.vercel.app
 
 ## License
 
-Private — Daystar University International Office. All rights reserved.
+Private — Daystar University Placement Office. All rights reserved.

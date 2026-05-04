@@ -24,7 +24,7 @@ import {
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
-const CASE_TYPES = ["STUDENT_PASS", "EXTENSION", "REGULARIZATION"];
+const CASE_TYPES = ["STUDENT_PASS", "VISA EXTENSION", "REGULARIZATION"];
 
 export default function DirectoryPage() {
   const searchParams = useSearchParams();
