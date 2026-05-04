@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import { getRiskState, getStatusStyles } from "@/utils/compliance";
 import { useRouter } from "next/navigation";
@@ -77,6 +77,7 @@ function splitName(fullName: string) {
 
 export default function StudentPortal() {
   const router = useRouter();
+  const updatesSectionRef = useRef<HTMLDivElement | null>(null);
   const [loading, setLoading] = useState(true);
   const [student, setStudent] = useState<any>(null);
   const [complianceCase, setComplianceCase] = useState<any>(null);
@@ -88,6 +89,7 @@ export default function StudentPortal() {
     Set<string>
   >(new Set());
   const [unreadCount, setUnreadCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [messageText, setMessageText] = useState("");
   const [messageSending, setMessageSending] = useState(false);
   const [uploadState, setUploadState] = useState<
@@ -195,6 +197,16 @@ export default function StudentPortal() {
   async function handleSignOut() {
     await supabase.auth.signOut();
     router.replace("/login");
+  }
+
+  function handleBellClick() {
+    setUnreadCount(0);
+    setShowNotifications((prev) => !prev);
+  }
+
+  function jumpToUpdates() {
+    updatesSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    setShowNotifications(false);
   }
 
   function setUploadFile(reqId: string, file: File | null) {
@@ -412,6 +424,7 @@ export default function StudentPortal() {
   const visibleAnnouncements = announcements.filter(
     (a) => !dismissedAnnouncements.has(a.id),
   );
+  const recentEvents = caseEvents.slice(0, 5);
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
@@ -427,7 +440,7 @@ export default function StudentPortal() {
           </div>
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setUnreadCount(0)}
+              onClick={handleBellClick}
               title={
                 unreadCount > 0
                   ? `${unreadCount} new updates`
@@ -437,11 +450,51 @@ export default function StudentPortal() {
             >
               <Bell size={15} />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 h-4 min-w-[16px] px-1 bg-blue-600 text-white text-[8px] font-black rounded-full flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 h-4 min-w-4 px-1 bg-blue-600 text-white text-[8px] font-black rounded-full flex items-center justify-center">
                   {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               )}
             </button>
+            {showNotifications && (
+              <div className="absolute right-6 top-16 w-[320px] max-w-[calc(100vw-3rem)] bg-white border border-slate-200 rounded-2xl shadow-xl p-3 z-20">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[10px] font-black text-slate-700 uppercase tracking-widest">
+                    Recent Updates
+                  </p>
+                  <button
+                    onClick={() => setShowNotifications(false)}
+                    className="text-slate-400 hover:text-slate-700"
+                    aria-label="Close notifications"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+                {recentEvents.length === 0 ? (
+                  <p className="text-xs text-slate-500 font-medium py-2">
+                    No updates yet.
+                  </p>
+                ) : (
+                  <ul className="space-y-2 max-h-64 overflow-auto pr-1">
+                    {recentEvents.map((event) => (
+                      <li key={event.id} className="bg-slate-50 border border-slate-100 rounded-xl p-2.5">
+                        <p className="text-xs font-black text-slate-800 line-clamp-2">
+                          {event.description}
+                        </p>
+                        <p className="mt-1 text-[10px] text-slate-500 font-bold uppercase tracking-wide">
+                          {(event.event_type ?? "update").replace(/_/g, " ")} · {new Date(event.created_at).toLocaleDateString("en-KE", { day: "numeric", month: "short" })}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <button
+                  onClick={jumpToUpdates}
+                  className="mt-3 w-full bg-blue-600 text-white py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 transition-all"
+                >
+                  View All Updates
+                </button>
+              </div>
+            )}
             <button
               onClick={handleSignOut}
               className="flex items-center gap-2 text-slate-400 hover:text-red-500 text-xs font-black uppercase tracking-widest transition-all"
@@ -461,7 +514,7 @@ export default function StudentPortal() {
             Welcome, {student?.full_name?.split(" ")[0]}
           </h1>
           <p className="text-slate-500 font-medium text-sm mt-1">
-            Your visa compliance overview · {student?.student_id}
+            Overview · {student?.student_id}
           </p>
         </div>
 
@@ -548,7 +601,7 @@ export default function StudentPortal() {
               </div>
               <div className="shrink-0">
                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
-                  Pipeline Stage
+                  Stage
                 </p>
                 <span className="text-xs font-black text-blue-700 bg-white border-2 border-blue-100 px-4 py-2 rounded-xl uppercase block text-center">
                   {stageInfo?.label ??
@@ -818,7 +871,10 @@ export default function StudentPortal() {
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-[2rem] shadow-sm overflow-hidden">
+        <div
+          ref={updatesSectionRef}
+          className="bg-white border border-slate-200 rounded-[2rem] shadow-sm overflow-hidden"
+        >
           <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/60">
             <h2 className="font-black text-slate-900 text-[10px] uppercase tracking-widest flex items-center gap-2">
               <MessageSquare size={14} className="text-blue-600" /> Updates from
@@ -878,7 +934,7 @@ export default function StudentPortal() {
                 Officer
               </h2>
               <p className="text-slate-400 text-xs font-medium mt-1">
-                Send a message that will appear in your compliance
+                The message will appear in your compliance
                 officer&apos;s event log.
               </p>
             </div>
@@ -1062,7 +1118,7 @@ export default function StudentPortal() {
         </div>
 
         <p className="text-center text-[10px] text-slate-400 font-bold uppercase tracking-widest pb-4">
-          Daystar University · International Office · SpiroHub
+          Daystar University · Placement Office · SpiroHub
         </p>
       </main>
     </div>

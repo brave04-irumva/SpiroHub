@@ -55,9 +55,6 @@ export default function AlertsPage() {
           <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter leading-none">
             Compliance Alerts
           </h1>
-          <p className="text-slate-500 font-medium text-sm mt-2">
-            Immediate action required for students in the risk window.
-          </p>
         </div>
         <div className="bg-red-50 text-red-600 px-4 py-2 rounded-xl font-black text-[10px] uppercase border border-red-100 flex items-center gap-2">
           <ShieldAlert size={16} /> {alerts.length} Critical Issues
