@@ -44,8 +44,12 @@ export async function POST(req: NextRequest) {
       .eq("email", user.email)
       .single();
 
-    if (actor?.role !== "ADMIN") {
-      return NextResponse.json({ error: "Admin permission required." }, { status: 403 });
+    const actorRole = String(actor?.role || "").toUpperCase();
+    const canManageStudents = actorRole === "ADMIN" || actorRole === "OFFICER";
+    const canManageStaff = actorRole === "ADMIN";
+
+    if (!canManageStudents && !canManageStaff) {
+      return NextResponse.json({ error: "Admin or officer permission required." }, { status: 403 });
     }
 
     const body = await req.json();
@@ -68,10 +72,6 @@ export async function POST(req: NextRequest) {
     if (!["ADMIN", "OFFICER", "STUDENT"].includes(role)) {
       return NextResponse.json({ error: "Invalid role." }, { status: 400 });
     }
-
-    const actorRole = actor?.role;
-    const canManageStudents = actorRole === "ADMIN" || actorRole === "OFFICER";
-    const canManageStaff = actorRole === "ADMIN";
 
     if (role === "STUDENT" && !canManageStudents) {
       return NextResponse.json({ error: "Permission denied." }, { status: 403 });
